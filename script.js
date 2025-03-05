@@ -5,6 +5,9 @@ colormap.set("In Progress", "inprogresscolor");
 colormap.set("Done", "donecolor");
 document.getElementsByClassName("task")[0].value = "";
 document.getElementsByClassName("description")[0].value = "";
+document.getElementById("searching-title").value = "";
+document.getElementById("searching-des").value = "";
+document.getElementById("searching-title-des").value = "";
 
 const all_tasks = document.getElementsByClassName("all-tasks")[0];
 
@@ -177,7 +180,13 @@ function Searchtasks(event, ref) {
     let unselected_options = calculate_unselected(storedtasks[a].status);
 
     let color = colormap.get(storedtasks[a].status);
-    if (text == storedtasks[a][property_to_search]) {
+    if (
+      (property_to_search != "" &&
+        text == storedtasks[a][property_to_search]) ||
+      (property_to_search == "" &&
+        (text == storedtasks[a]["title"] ||
+          text == storedtasks[a]["description"]))
+    ) {
       console.log("match");
       htmlcode += `<div class="card m-3 ${color}" style="width: 18rem">
 
