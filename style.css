@@ -1,3 +1,14 @@
-form {
-  margin-top: 100px;
+.todocolor {
+  background-color: rgb(151, 151, 190);
+  border: 3px solid rgb(52, 52, 107);
+}
+
+.donecolor {
+  background-color: rgb(87, 155, 87);
+  border: 3px solid rgb(54, 99, 54);
+}
+
+.inprogresscolor {
+  background-color: rgb(180, 115, 115);
+  border: 3px solid rgb(77, 48, 48);
 }
