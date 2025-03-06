@@ -123,12 +123,10 @@ function DeleteTask(ids) {
 }
 
 function UpdateStatus(status_name, taskId) {
-  console.log(status_name, " ", taskId);
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
   let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
   let taskIndex = storedtasks.findIndex((task) => task.id === taskId);
   let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
-  console.log(taskIndex, " ", searchedTaskIndex);
   if (taskIndex !== -1) {
     storedtasks[taskIndex].status = status_name;
     localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
@@ -146,7 +144,6 @@ function UpdateStatus(status_name, taskId) {
 }
 
 function handleStatusChange(optionId) {
-  console.log(optionId);
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (
     searchContentTitle.value == "" &&
@@ -154,10 +151,8 @@ function handleStatusChange(optionId) {
     searchContentTitleDes.value == ""
   ) {
     if (optionId == "all-task") {
-      console.log("hereeee! 1");
       showTasks(storedtasks);
     } else {
-      console.log("hereeee! 2");
       Showselectedtasks(optionId, storedtasks);
     }
   } else {
