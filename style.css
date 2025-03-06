@@ -12,3 +12,26 @@
   background-color: rgb(180, 115, 115);
   border: 3px solid rgb(77, 48, 48);
 }
+
+.status-change {
+  width: auto;
+  min-width: 120px;
+}
+
+.no-content {
+  background-color: rgb(250, 225, 162);
+  border: 3px solid rgb(246, 195, 68);
+}
+
+.form-floating > input {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form-floating > label {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
