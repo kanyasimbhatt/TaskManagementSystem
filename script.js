@@ -123,12 +123,24 @@ function DeleteTask(ids) {
 }
 
 function UpdateStatus(status_name, taskId) {
+  console.log(status_name, " ", taskId);
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
   let taskIndex = storedtasks.findIndex((task) => task.id === taskId);
-  if (taskIndex === -1) return;
+  let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
+  console.log(taskIndex, " ", searchedTaskIndex);
+  if (taskIndex !== -1) {
+    storedtasks[taskIndex].status = status_name;
+    localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
+  }
 
-  storedtasks[taskIndex].status = status_name;
-  localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
+  if (searchedTaskIndex !== -1) {
+    searchedTasks[searchedTaskIndex].status = status_name;
+
+    localStorage.setItem("searched-array", JSON.stringify(searchedTasks));
+  }
+
+  if (taskId === -1 && searchedTaskIndex === -1) return;
 
   handleStatusChange(filterElement.value);
 }
@@ -142,15 +154,17 @@ function handleStatusChange(optionId) {
     searchContentTitleDes.value == ""
   ) {
     if (optionId == "all-task") {
-      console.log("all task");
+      console.log("hereeee! 1");
       showTasks(storedtasks);
     } else {
+      console.log("hereeee! 2");
       Showselectedtasks(optionId, storedtasks);
     }
   } else {
     let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
-    if (optionId == "all-task") showTasks(searchedTasks);
-    else {
+    if (optionId == "all-task") {
+      showTasks(searchedTasks);
+    } else {
       Showselectedtasks(optionId, searchedTasks);
     }
   }
@@ -170,47 +184,15 @@ function Showselectedtasks(taskId, storedtasks) {
   if (showtasktitle == "") {
     return;
   }
+  let showSelectedArr = [];
 
-  let htmlcode = "";
   for (let a in storedtasks) {
-    let unselected_options = calculate_unselected(storedtasks[a].status);
-
-    for (let i of statusarr) {
-      if (i != storedtasks[a].status) {
-        unselected_options.push(i);
-      }
-    }
     if (storedtasks[a].status == showtasktitle) {
-      let color = colormap.get(storedtasks[a].status);
-      htmlcode += `<div class="card m-3 ${color} shadow-sm" style="width: 18rem">
-
-
-     <div class="card-body d-flex flex-column align-items-center">
-       <h5 class="card-title">${storedtasks[a].title}</h5>
-       <p class="card-text text-center">
-         ${storedtasks[a].description}
-       </p>
-<select class="form-select h-20"
-   id="status-${storedtasks[a].id}"
-   onchange="UpdateStatus(this.value, '${tasks[a].id}')">
-   <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
-   <option value="${unselected_options[0]}">${unselected_options[0]}</option>
-   <option value="${unselected_options[1]}">${unselected_options[1]}</option>
-</select>
-           <div class = "d-flex flex-row gap-5 m-4 justify-content-center">
-       <a href="#" onClick = "editTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Edit</a>
-       <a href="#" onClick = "DeleteTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Delete</a>
-       </div>
-       </div>
-     </div> `;
+      showSelectedArr.push(storedtasks[a]);
     }
   }
 
-  if (htmlcode == "") {
-    all_tasks.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-3 mb-3">No Tasks under ${showtasktitle}</b></div>`;
-  } else {
-    all_tasks.innerHTML = htmlcode;
-  }
+  showTasks(showSelectedArr);
 }
 
 function Searchtasks(event, ref) {
@@ -230,15 +212,12 @@ function Searchtasks(event, ref) {
       : input_id == "searching-des"
       ? "description"
       : "";
-  let htmlcode = "";
+
   let searchedOutput = [];
   if (!localStorage.getItem("searched-array")) {
     localStorage.setItem("searched-array", JSON.stringify([]));
   }
   for (let a in storedtasks) {
-    let unselected_options = calculate_unselected(storedtasks[a].status);
-
-    let color = colormap.get(storedtasks[a].status);
     if (
       (property_to_search != "" &&
         text == storedtasks[a][property_to_search]) ||
@@ -247,38 +226,12 @@ function Searchtasks(event, ref) {
           text == storedtasks[a]["description"]))
     ) {
       searchedOutput.push(storedtasks[a]);
-      console.log("match");
-      htmlcode += `<div class="card m-3 ${color} shadow-sm" style="width: 18rem">
-
-
-     <div class="card-body d-flex flex-column align-items-center">
-       <h5 class="card-title">${storedtasks[a].title}</h5>
-       <p class="card-text text-center">
-         ${storedtasks[a].description}
-       </p>
-<select class="form-select h-20"
-   id="status-${storedtasks[a].id}"
-   onchange="UpdateStatus(this.value, '${tasks[a].id}')">
-   <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
-   <option value="${unselected_options[0]}">${unselected_options[0]}</option>
-   <option value="${unselected_options[1]}">${unselected_options[1]}</option>
-</select>
-           <div class = "d-flex flex-row gap-5 m-4 justify-content-center">
-       <a href="#" onClick = "editTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Edit</a>
-       <a href="#" onClick = "DeleteTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Delete</a>
-       </div>
-       </div>
-     </div> `;
     }
   }
 
   localStorage.setItem("searched-array", JSON.stringify(searchedOutput));
 
-  if (htmlcode.length == 0) {
-    all_tasks.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-3 mb-3">No tasks under this search</b></div>`;
-  } else {
-    all_tasks.innerHTML = htmlcode;
-  }
+  handleStatusChange(filterElement.value);
 }
 
 function editTask(identifier) {
