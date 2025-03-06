@@ -1,3 +1,4 @@
+//initial setup
 let statusarr = ["ToDo", "In Progress", "Done"];
 let colormap = new Map();
 colormap.set("ToDo", "todocolor");
@@ -13,6 +14,10 @@ const addButton = document.getElementsByClassName("add-button")[0];
 let title = document.getElementsByClassName("task")[0];
 let description = document.getElementsByClassName("description")[0];
 let status = document.getElementsByClassName("status")[0];
+const searchContentTitle = document.getElementById("searching-title");
+const searchContentDescription = document.getElementById("searching-des");
+const filterElement = document.getElementsByClassName("status-change")[0];
+const searchContentTitleDes = document.getElementById("searching-title-des");
 let statusOption1 = status.children[1];
 let statusOtion2 = status.children[2];
 
@@ -45,6 +50,10 @@ function addTask() {
   localStorage.setItem("tasks-array", JSON.stringify(arr));
   title.value = "";
   description.value = "";
+  filterElement.value = "all-task";
+  searchContentTitle.value = "";
+  searchContentDescription.value = "";
+  searchContentTitleDes.value = "";
   showTasks(arr);
 }
 
@@ -121,14 +130,11 @@ function UpdateStatus(status_name, taskId) {
   storedtasks[taskIndex].status = status_name;
   localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
 
-  showTasks(storedtasks);
+  handleStatusChange(filterElement.value);
 }
 
 function handleStatusChange(optionId) {
   console.log(optionId);
-  const searchContentTitle = document.getElementById("searching-title");
-  const searchContentDescription = document.getElementById("searching-des");
-  const searchContentTitleDes = document.getElementById("searching-title-des");
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (
     searchContentTitle.value == "" &&
@@ -184,11 +190,13 @@ function Showselectedtasks(taskId, storedtasks) {
        <p class="card-text text-center">
          ${storedtasks[a].description}
        </p>
-       <select class="form-select display-status"  aria-label="Default select example">
-             <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
-             <option onClick = "UpdateStatus(${this.value}, this.id)" value="${unselected_options[0]}">${unselected_options[0]}</option>
-             <option onClick = "UpdateStatus(${this.value}, this.id)" value="${unselected_options[1]}">${unselected_options[1]}</option>
-           </select>
+<select class="form-select h-20"
+   id="status-${storedtasks[a].id}"
+   onchange="UpdateStatus(this.value, '${tasks[a].id}')">
+   <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
+   <option value="${unselected_options[0]}">${unselected_options[0]}</option>
+   <option value="${unselected_options[1]}">${unselected_options[1]}</option>
+</select>
            <div class = "d-flex flex-row gap-5 m-4 justify-content-center">
        <a href="#" onClick = "editTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Edit</a>
        <a href="#" onClick = "DeleteTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Delete</a>
@@ -212,7 +220,10 @@ function Searchtasks(event, ref) {
   const input_ele = document.getElementById(input_id);
   const text = input_ele.value;
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
-  console.log(text);
+  if (text == "") {
+    showTasks(storedtasks);
+    return;
+  }
   let property_to_search =
     input_id == "searching-title"
       ? "title"
@@ -245,11 +256,13 @@ function Searchtasks(event, ref) {
        <p class="card-text text-center">
          ${storedtasks[a].description}
        </p>
-       <select class="form-select display-status"  aria-label="Default select example">
-             <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
-             <option onClick = "UpdateStatus(this.value, this.id)" id = "dfdf" value="${unselected_options[0]}">${unselected_options[0]}</option>
-             <option onClick = "UpdateStatus(this.value, this.id)" id = "dff" value="${unselected_options[1]}">${unselected_options[1]}</option>
-           </select>
+<select class="form-select h-20"
+   id="status-${storedtasks[a].id}"
+   onchange="UpdateStatus(this.value, '${tasks[a].id}')">
+   <option selected value="${storedtasks[a].status}" disabled>${storedtasks[a].status}</option>
+   <option value="${unselected_options[0]}">${unselected_options[0]}</option>
+   <option value="${unselected_options[1]}">${unselected_options[1]}</option>
+</select>
            <div class = "d-flex flex-row gap-5 m-4 justify-content-center">
        <a href="#" onClick = "editTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Edit</a>
        <a href="#" onClick = "DeleteTask(this.id)" id = "${storedtasks[a].id}" class="btn btn-warning">Delete</a>
@@ -287,7 +300,10 @@ function editTask(identifier) {
 }
 
 function editTaskContent(identifier) {
-  console.log(identifier);
+  filterElement.value = "all-task";
+  searchContentTitle.value = "";
+  searchContentDescription.value = "";
+  searchContentTitleDes.value = "";
 
   let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
   let index = getIndexFromId(identifier, storedtasks);
