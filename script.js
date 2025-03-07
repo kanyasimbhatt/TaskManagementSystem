@@ -1,9 +1,9 @@
 //initial setup
 let statusarr = ["ToDo", "In Progress", "Done"];
-let colormap = new Map();
-colormap.set("ToDo", "todocolor");
-colormap.set("In Progress", "inprogresscolor");
-colormap.set("Done", "donecolor");
+let colorMap = new Map();
+colorMap.set("ToDo", "todocolor");
+colorMap.set("In Progress", "inprogresscolor");
+colorMap.set("Done", "donecolor");
 document.getElementById("searching-title").value = "";
 document.getElementById("searching-des").value = "";
 document.getElementById("searching-title-des").value = "";
@@ -21,16 +21,20 @@ const searchContentTitleDes = document.getElementById("searching-title-des");
 let statusOption1 = status.children[1];
 let statusOtion2 = status.children[2];
 
+if (!localStorage.getItem("searched-array")) {
+  localStorage.setItem("searched-array", JSON.stringify([]));
+}
+
+if (!localStorage.getItem("tasks-array")) {
+  localStorage.setItem("tasks-array", JSON.stringify([]));
+}
+
 title.value = "";
 description.value = "";
 
-const all_tasks = document.getElementsByClassName("all-tasks")[0];
+const allTask = document.getElementsByClassName("all-tasks")[0];
 
 function addTask() {
-  if (!localStorage.getItem("tasks-array")) {
-    localStorage.setItem("tasks-array", JSON.stringify([]));
-  }
-
   let title = document.getElementsByClassName("task")[0];
   let description = document.getElementsByClassName("description")[0];
   let status = document.getElementsByClassName("status")[0];
@@ -57,7 +61,7 @@ function addTask() {
   showTasks(arr);
 }
 
-function calculate_unselected(status) {
+function calculateUnselected(status) {
   let unselected = [];
   for (let i of statusarr) {
     if (i != status) {
@@ -71,65 +75,67 @@ function showTasks(tasks) {
   let htmlcode = "";
 
   for (let a in tasks) {
-    let color = colormap.get(tasks[a].status);
-    let unselected_options = calculate_unselected(tasks[a].status);
+    let color = colorMap.get(tasks[a].status);
+    let unselectedOptions = calculateUnselected(tasks[a].status);
 
     htmlcode += `<div class="card m-3 ${color} shadow-sm" style="width: 18rem">
 
 
+
+
 <div class="card-body d-flex flex-column align-items-center justify-content-center">
- <h5 class="card-title h-20">${tasks[a].title}</h5>
- <p class="card-text text-center h-20">
-   ${tasks[a].description}
- </p>
- <select class="form-select h-20"
-   id="status-${tasks[a].id}"
-   onchange="UpdateStatus(this.value, '${tasks[a].id}')">
-   <option selected value="${tasks[a].status}" disabled>${tasks[a].status}</option>
-   <option value="${unselected_options[0]}">${unselected_options[0]}</option>
-   <option value="${unselected_options[1]}">${unselected_options[1]}</option>
+<h5 class="card-title h-20">${tasks[a].title}</h5>
+<p class="card-text text-center h-20">
+  ${tasks[a].description}
+</p>
+<select class="form-select h-20"
+  id="status-${tasks[a].id}"
+  onchange="UpdateStatus(this.value, '${tasks[a].id}')">
+  <option selected value="${tasks[a].status}" disabled>${tasks[a].status}</option>
+  <option value="${unselectedOptions[0]}">${unselectedOptions[0]}</option>
+  <option value="${unselectedOptions[1]}">${unselectedOptions[1]}</option>
 </select>
-     <div class = "d-flex flex-row gap-5 m-4 justify-content-end h-40">
- <a href="#" onClick = "editTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Edit</a>
- <a href="#" onClick = "DeleteTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Delete</a>
- </div>
- </div>
+    <div class = "d-flex flex-row gap-5 m-4 justify-content-end h-40">
+<a href="#" onClick = "editTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Edit</a>
+<a href="#" onClick = "DeleteTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Delete</a>
+</div>
+</div>
 </div> `;
   }
 
   if (tasks.length != 0) {
-    all_tasks.innerHTML = htmlcode;
+    allTask.innerHTML = htmlcode;
   } else {
-    all_tasks.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-2 mb-2">No Tasks yet</b></div>`;
+    allTask.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-2 mb-2">No Tasks yet</b></div>`;
   }
 }
 let tasks = JSON.parse(localStorage.getItem("tasks-array"));
 showTasks(tasks);
 
-function getIndexFromId(ids, storedtasks) {
+function getIndexFromId(ids, storedTasks) {
   let index = 0;
-  for (let a in storedtasks) {
-    if (storedtasks[a].id == ids) index = a;
+  for (let a in storedTasks) {
+    if (storedTasks[a].id == ids) index = a;
   }
   return index;
 }
 
 function DeleteTask(ids) {
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
-  let index = getIndexFromId(ids, storedtasks);
-  storedtasks.splice(index, 1);
-  localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
-  showTasks(storedtasks);
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let index = getIndexFromId(ids, storedTasks);
+  storedTasks.splice(index, 1);
+  localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
+  showTasks(storedTasks);
 }
 
 function UpdateStatus(status_name, taskId) {
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
-  let taskIndex = storedtasks.findIndex((task) => task.id === taskId);
+  let taskIndex = storedTasks.findIndex((task) => task.id === taskId);
   let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
   if (taskIndex !== -1) {
-    storedtasks[taskIndex].status = status_name;
-    localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
+    storedTasks[taskIndex].status = status_name;
+    localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
   }
 
   if (searchedTaskIndex !== -1) {
@@ -139,34 +145,33 @@ function UpdateStatus(status_name, taskId) {
   }
 
   if (taskId === -1 && searchedTaskIndex === -1) return;
-
   handleStatusChange(filterElement.value);
 }
 
 function handleStatusChange(optionId) {
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (
     searchContentTitle.value == "" &&
     searchContentDescription.value == "" &&
     searchContentTitleDes.value == ""
   ) {
     if (optionId == "all-task") {
-      showTasks(storedtasks);
+      showTasks(storedTasks);
     } else {
-      Showselectedtasks(optionId, storedtasks);
+      showSelectedTasks(optionId, storedTasks);
     }
   } else {
     let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
     if (optionId == "all-task") {
       showTasks(searchedTasks);
     } else {
-      Showselectedtasks(optionId, searchedTasks);
+      showSelectedTasks(optionId, searchedTasks);
     }
   }
 }
 
-function Showselectedtasks(taskId, storedtasks) {
-  all_tasks.innerHTML = "";
+function showSelectedTasks(taskId, storedTasks) {
+  allTask.innerHTML = "";
 
   let showtasktitle =
     taskId == "done"
@@ -181,60 +186,56 @@ function Showselectedtasks(taskId, storedtasks) {
   }
   let showSelectedArr = [];
 
-  for (let a in storedtasks) {
-    if (storedtasks[a].status == showtasktitle) {
-      showSelectedArr.push(storedtasks[a]);
+  for (let a in storedTasks) {
+    if (storedTasks[a].status == showtasktitle) {
+      showSelectedArr.push(storedTasks[a]);
     }
   }
 
   showTasks(showSelectedArr);
 }
 
-function Searchtasks(event, ref) {
-  if (event.key != "Enter") return;
+function searchTasks(event, ref) {
+  // if (event.key != "Enter") return;
 
-  const input_id = ref.id;
-  const input_ele = document.getElementById(input_id);
-  const text = input_ele.value;
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
+  const inputId = ref.id;
+  const inputEle = document.getElementById(inputId);
+  const text = inputEle.value.toLowerCase();
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (text == "") {
-    showTasks(storedtasks);
+    showTasks(storedTasks);
     return;
   }
-  let property_to_search =
-    input_id == "searching-title"
+  let propertyToSearch =
+    inputId == "searching-title"
       ? "title"
-      : input_id == "searching-des"
+      : inputId == "searching-des"
       ? "description"
       : "";
 
   let searchedOutput = [];
-  if (!localStorage.getItem("searched-array")) {
-    localStorage.setItem("searched-array", JSON.stringify([]));
-  }
-  for (let a in storedtasks) {
+  for (let a in storedTasks) {
     if (
-      (property_to_search != "" &&
-        text == storedtasks[a][property_to_search]) ||
-      (property_to_search == "" &&
-        (text == storedtasks[a]["title"] ||
-          text == storedtasks[a]["description"]))
+      (propertyToSearch != "" &&
+        storedTasks[a][propertyToSearch].toLowerCase().includes(text)) ||
+      (propertyToSearch == "" &&
+        (storedTasks[a]["title"].toLowerCase().includes(text) ||
+          storedTasks[a]["description"].toLowerCase().includes(text)))
     ) {
-      searchedOutput.push(storedtasks[a]);
+      searchedOutput.push(storedTasks[a]);
     }
   }
-
   localStorage.setItem("searched-array", JSON.stringify(searchedOutput));
 
-  handleStatusChange(filterElement.value);
+  showTasks(searchedOutput);
 }
 
 function editTask(identifier) {
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
 
-  let index = getIndexFromId(identifier, storedtasks);
+  let index = getIndexFromId(identifier, storedTasks);
 
-  let editTaskObj = storedtasks[index];
+  let editTaskObj = storedTasks[index];
 
   addTaskText.textContent = "Update Task";
   addButton.onclick = function () {
@@ -253,12 +254,12 @@ function editTaskContent(identifier) {
   searchContentDescription.value = "";
   searchContentTitleDes.value = "";
 
-  let storedtasks = JSON.parse(localStorage.getItem("tasks-array"));
-  let index = getIndexFromId(identifier, storedtasks);
+  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
+  let index = getIndexFromId(identifier, storedTasks);
 
-  storedtasks[index].title = title.value;
-  storedtasks[index].description = description.value;
-  storedtasks[index].status = status.value;
+  storedTasks[index].title = title.value;
+  storedTasks[index].description = description.value;
+  storedTasks[index].status = status.value;
 
   title.value = "";
   description.value = "";
@@ -271,6 +272,6 @@ function editTaskContent(identifier) {
   statusOption1.disabled = true;
   statusOtion2.disabled = true;
 
-  localStorage.setItem("tasks-array", JSON.stringify(storedtasks));
-  showTasks(storedtasks);
+  localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
+  showTasks(storedTasks);
 }
