@@ -24,6 +24,8 @@ document.getElementById("searching-des").value = "";
 document.getElementById("searching-title-des").value = "";
 title.value = "";
 description.value = "";
+let tasksArray = [];
+let filterArray = [];
 showTasks(tasks);
 
 if (!localStorage.getItem("searched-array")) {
@@ -42,6 +44,7 @@ function addTask() {
     alert("Enter title and description");
     return;
   }
+  let buttonId = addButton.getAttribute("id");
   let tasks = {
     id: crypto.randomUUID(),
     title: title.value,
@@ -65,6 +68,7 @@ function storeDataToLocal(arr) {
   localStorage.setItem("tasks-array", JSON.stringify(arr));
 }
 
+//calculateUnselected() -> used to get those status which is currently not selected by the task.
 function calculateUnselected(status) {
   let unselected = [];
   for (let i of statusarr) {
@@ -87,24 +91,24 @@ function showTasks(tasks) {
 
 
 
-<div class="card-body d-flex flex-column align-items-center justify-content-center">
-<h5 class="card-title h-20">${tasks[a].title}</h5>
-<p class="card-text text-center h-20">
-  ${tasks[a].description}
-</p>
-<select class="form-select h-20"
-  id="status-${tasks[a].id}"
-  onchange="UpdateStatus(this.value, '${tasks[a].id}')">
-  <option selected value="${tasks[a].status}" disabled>${tasks[a].status}</option>
-  <option value="${unselectedOptions[0]}">${unselectedOptions[0]}</option>
-  <option value="${unselectedOptions[1]}">${unselectedOptions[1]}</option>
-</select>
-    <div class = "d-flex flex-row gap-5 m-4 justify-content-end h-40">
-<a href="#" onClick = "editTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Edit</a>
-<a href="#" onClick = "DeleteTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Delete</a>
-</div>
-</div>
-</div> `;
+    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <h5 class="card-title h-20">${tasks[a].title}</h5>
+    <p class="card-text text-center h-20">
+      ${tasks[a].description}
+    </p>
+    <select class="form-select h-20"
+      id="status-${tasks[a].id}"
+      onchange="updateStatus(this.value, '${tasks[a].id}')">
+      <option selected value="${tasks[a].status}" disabled>${tasks[a].status}</option>
+      <option value="${unselectedOptions[0]}">${unselectedOptions[0]}</option>
+      <option value="${unselectedOptions[1]}">${unselectedOptions[1]}</option>
+    </select>
+        <div class = "d-flex flex-row gap-5 m-4 justify-content-end h-40">
+    <a href="#" onClick = "editTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Edit</a>
+    <a href="#" onClick = "DeleteTask(this.id)" id = "${tasks[a].id}" class="btn btn-warning">Delete</a>
+    </div>
+    </div>
+    </div> `;
   }
 
   if (tasks.length != 0) {
@@ -130,7 +134,8 @@ function DeleteTask(ids) {
   showTasks(storedTasks);
 }
 
-function UpdateStatus(status_name, taskId) {
+//updateStatus() -> handling the status change from the task card itself
+function updateStatus(status_name, taskId) {
   let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
   let taskIndex = storedTasks.findIndex((task) => task.id === taskId);
@@ -150,6 +155,7 @@ function UpdateStatus(status_name, taskId) {
   handleStatusChange(filterElement.value);
 }
 
+//handleStatusChange() -> handling the status change from filter drop down
 function handleStatusChange(optionId) {
   let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (
@@ -218,7 +224,7 @@ function searchTasks(event, ref) {
   let searchedOutput = [];
   for (let a in storedTasks) {
     if (
-      (propertyToSearch != "" &&
+      (propertyToSearch !== "" &&
         storedTasks[a][propertyToSearch].toLowerCase().includes(text)) ||
       (propertyToSearch == "" &&
         (storedTasks[a]["title"].toLowerCase().includes(text) ||
@@ -241,6 +247,7 @@ function editTask(identifier) {
 
   addTaskText.textContent = "Update Task";
   addButton.textContent = "Update";
+  addButton.setAttribute("id", "update-functionality");
   addButton.onclick = function () {
     editTaskContent(identifier);
   };
@@ -270,6 +277,7 @@ function editTaskContent(identifier) {
 
   addTaskText.textContent = "Add Task";
   addButton.textContent = "Add";
+  addButton.setAttribute("id", "add-functionality");
   addButton.onclick = function () {
     addTask();
   };
