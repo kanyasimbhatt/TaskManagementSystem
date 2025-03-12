@@ -104,7 +104,7 @@
               type="search"
               placeholder="Search Task"
               aria-label="Search"
-              onkeypress="searchTasks(event, this);"
+              onkeyup="searchTitle(event);"
               required
             />
             <label for="searching-title" class="form-label">Task</label>
@@ -117,7 +117,7 @@
               placeholder="Search Description"
               aria-label="Search"
               required
-              onkeypress="searchTasks(event, this);"
+              onkeyup="searchDescription(event);"
             />
             <label for="searching-des" class="form-label">Description</label>
           </div>
@@ -128,7 +128,7 @@
               id="searching-title-des"
               placeholder="Search Task and Description"
               aria-label="Search"
-              onkeypress="searchTasks(event, this)"
+              onkeyup="searchTitleDes(event)"
               required
             />
             <label for="searching-task-des" class="form-label"
@@ -148,7 +148,7 @@
       </div>
       <!--All Tasks-->
       <div
-        class="all-tasks d-flex flex-wrap overflow-auto justify-content-center justify-content-lg-start flex-grow-1 m-4 m-sm-6"
+        class="all-tasks d-flex flex-wrap overflow-auto justify-content-center justify-content-lg-start flex-grow-1 mt-4"
       ></div>
     </div>
     <script defer src="./script.js"></script>

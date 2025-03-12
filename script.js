@@ -24,10 +24,7 @@ document.getElementById("searching-des").value = "";
 document.getElementById("searching-title-des").value = "";
 title.value = "";
 description.value = "";
-let tasksArray = [];
-let filterArray = [];
-showTasks(tasks);
-
+status.value = "ToDo";
 if (!localStorage.getItem("searched-array")) {
   storeDataToLocal([]);
 }
@@ -35,33 +32,49 @@ if (!localStorage.getItem("searched-array")) {
 if (!localStorage.getItem("tasks-array")) {
   storeDataToLocal([]);
 }
+let tasksArray = tasks;
+let filterArray = tasksArray;
+let statusChangedTasks = [];
 
-function addTask() {
-  let title = document.getElementsByClassName("task")[0];
-  let description = document.getElementsByClassName("description")[0];
-  let status = document.getElementsByClassName("status")[0];
+showTasks(tasks);
+
+function addTask(identifier) {
+  let id;
+  if (identifier) id = identifier;
+  else id = crypto.randomUUID();
+  let index = getIndexFromId(identifier, tasksArray);
+
   if (title.value == "" || description.value == "") {
     alert("Enter title and description");
     return;
   }
-  let buttonId = addButton.getAttribute("id");
-  let tasks = {
-    id: crypto.randomUUID(),
-    title: title.value,
-    description: description.value,
-    status: status.value,
-  };
+  if (index == -1) {
+    let tasks = {
+      id: id,
+      title: title.value,
+      description: description.value,
+      status: status.value,
+    };
+    tasksArray.push(tasks);
+  } else {
+    tasksArray[index].title = title.value;
+    tasksArray[index].description = description.value;
+    tasksArray[index].status = status.value;
+  }
 
-  let arr = JSON.parse(localStorage.getItem("tasks-array"));
-  arr.push(tasks);
-  storeDataToLocal(arr);
+  storeDataToLocal(tasksArray);
   title.value = "";
   description.value = "";
+  status.value = "ToDo";
   filterElement.value = "all-task";
   searchContentTitle.value = "";
   searchContentDescription.value = "";
+  addTaskText.textContent = "Add Task";
+  addButton.textContent = "Add";
+  statusOption1.disabled = true;
+  statusOtion2.disabled = true;
   searchContentTitleDes.value = "";
-  showTasks(arr);
+  showTasks(tasksArray);
 }
 
 function storeDataToLocal(arr) {
@@ -86,7 +99,7 @@ function showTasks(tasks) {
     let color = colorMap.get(tasks[a].status);
     let unselectedOptions = calculateUnselected(tasks[a].status);
 
-    htmlcode += `<div class="card m-3 ${color} shadow-sm" style="width: 18rem">
+    htmlcode += `<div class="card me-2 mb-2 ${color} shadow-sm" style="width: 18rem">
 
 
 
@@ -114,12 +127,12 @@ function showTasks(tasks) {
   if (tasks.length != 0) {
     allTask.innerHTML = htmlcode;
   } else {
-    allTask.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-2 mb-2">No Tasks yet</b></div>`;
+    allTask.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1"><b class="mt-2 mb-2">No Tasks yet</b></div>`;
   }
 }
 
 function getIndexFromId(ids, storedTasks) {
-  let index = 0;
+  let index = -1;
   for (let a in storedTasks) {
     if (storedTasks[a].id == ids) index = a;
   }
@@ -127,22 +140,20 @@ function getIndexFromId(ids, storedTasks) {
 }
 
 function DeleteTask(ids) {
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
-  let index = getIndexFromId(ids, storedTasks);
-  storedTasks.splice(index, 1);
-  storeDataToLocal(storedTasks);
-  showTasks(storedTasks);
+  let index = getIndexFromId(ids, tasksArray);
+  tasksArray.splice(index, 1);
+  storeDataToLocal(tasksArray);
+  showTasks(tasksArray);
 }
 
 //updateStatus() -> handling the status change from the task card itself
 function updateStatus(status_name, taskId) {
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
-  let taskIndex = storedTasks.findIndex((task) => task.id === taskId);
+  let taskIndex = tasksArray.findIndex((task) => task.id === taskId);
   let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
   if (taskIndex !== -1) {
-    storedTasks[taskIndex].status = status_name;
-    storeDataToLocal(storedTasks);
+    tasksArray[taskIndex].status = status_name;
+    storeDataToLocal(tasksArray);
   }
 
   if (searchedTaskIndex !== -1) {
@@ -157,23 +168,22 @@ function updateStatus(status_name, taskId) {
 
 //handleStatusChange() -> handling the status change from filter drop down
 function handleStatusChange(optionId) {
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   if (
     searchContentTitle.value == "" &&
     searchContentDescription.value == "" &&
     searchContentTitleDes.value == ""
   ) {
     if (optionId == "all-task") {
-      showTasks(storedTasks);
+      showTasks(tasksArray);
     } else {
-      showSelectedTasks(optionId, storedTasks);
+      console.log(optionId);
+      showSelectedTasks(optionId, tasksArray);
     }
   } else {
-    let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
     if (optionId == "all-task") {
-      showTasks(searchedTasks);
+      showTasks(filterArray);
     } else {
-      showSelectedTasks(optionId, searchedTasks);
+      showSelectedTasks(optionId, filterArray);
     }
   }
 }
@@ -199,91 +209,129 @@ function showSelectedTasks(taskId, storedTasks) {
       showSelectedArr.push(storedTasks[a]);
     }
   }
-
+  statusChangedTasks = showSelectedArr;
   showTasks(showSelectedArr);
 }
 
-function searchTasks(event, ref) {
-  // if (event.key != "Enter") return;
+function searchTitle(event) {
+  if (filterElement.value != "all-task") {
+    if (event.key == "Delete" || event.key == "Backspace") {
+      console.log(filterElement.value);
+      filterArray = statusChangedTasks;
+    }
+    let text = searchContentTitle.value.toLowerCase();
+    filterArray = statusChangedTasks.filter((taskObj) => {
+      return taskObj.title.toLowerCase().includes(text) ? 1 : 0;
+    });
 
-  const inputId = ref.id;
-  const inputEle = document.getElementById(inputId);
-  const text = inputEle.value.toLowerCase();
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
-  if (text == "") {
-    showTasks(storedTasks);
+    showTasks(filterArray);
     return;
   }
-  let propertyToSearch =
-    inputId == "searching-title"
-      ? "title"
-      : inputId == "searching-des"
-      ? "description"
-      : "";
-
-  let searchedOutput = [];
-  for (let a in storedTasks) {
-    if (
-      (propertyToSearch !== "" &&
-        storedTasks[a][propertyToSearch].toLowerCase().includes(text)) ||
-      (propertyToSearch == "" &&
-        (storedTasks[a]["title"].toLowerCase().includes(text) ||
-          storedTasks[a]["description"].toLowerCase().includes(text)))
-    ) {
-      searchedOutput.push(storedTasks[a]);
-    }
+  if (event.key == "Delete" || event.key == "Backspace") {
+    filterArray = tasksArray;
   }
-  localStorage.setItem("searched-array", JSON.stringify(searchedOutput));
+  if (
+    searchContentTitle.value === "" &&
+    searchContentDescription.value === "" &&
+    searchContentTitleDes.value === ""
+  ) {
+    filterArray = tasksArray;
+    showTasks(filterArray);
+  }
+  let text = searchContentTitle.value.toLowerCase();
+  filterArray = filterArray.filter((taskObj) => {
+    return taskObj.title.toLowerCase().includes(text) ? 1 : 0;
+  });
 
-  showTasks(searchedOutput);
+  showTasks(filterArray);
+}
+
+function searchDescription(event) {
+  if (filterElement.value != "all-task") {
+    if (event.key == "Delete" || event.key == "Backspace") {
+      console.log(filterElement.value);
+      filterArray = statusChangedTasks;
+    }
+    let text = searchContentDescription.value.toLowerCase();
+    filterArray = statusChangedTasks.filter((taskObj) => {
+      return taskObj.description.toLowerCase().includes(text) ? 1 : 0;
+    });
+
+    showTasks(filterArray);
+    return;
+  }
+  if (event.key == "Delete" || event.key == "Backspace") {
+    filterArray = tasksArray;
+  }
+  if (
+    searchContentTitle.value === "" &&
+    searchContentDescription.value === "" &&
+    searchContentTitleDes.value === ""
+  ) {
+    filterArray = tasksArray;
+    showTasks(filterArray);
+  }
+  let text = searchContentDescription.value.toLowerCase();
+  filterArray = filterArray.filter((taskObj) => {
+    return taskObj.description.toLowerCase().includes(text) ? 1 : 0;
+  });
+
+  showTasks(filterArray);
+}
+
+function searchTitleDes(event) {
+  if (filterElement.value != "all-task") {
+    if (event.key == "Delete" || event.key == "Backspace") {
+      console.log(filterElement.value);
+      filterArray = statusChangedTasks;
+    }
+    let text = searchContentTitleDes.value.toLowerCase();
+    filterArray = statusChangedTasks.filter((taskObj) => {
+      return taskObj.description.toLowerCase().includes(text) ||
+        taskObj.title.toLowerCase().includes(text)
+        ? 1
+        : 0;
+    });
+
+    showTasks(filterArray);
+    return;
+  }
+  if (event.key == "Delete" || event.key == "Backspace") {
+    filterArray = tasksArray;
+  }
+  if (
+    searchContentTitle.value === "" &&
+    searchContentDescription.value === "" &&
+    searchContentTitleDes.value === ""
+  ) {
+    filterArray = tasksArray;
+    showTasks(filterArray);
+  }
+
+  let text = searchContentTitleDes.value.toLowerCase();
+
+  filterArray = filterArray.filter((taskObj) => {
+    return taskObj.description.toLowerCase().includes(text) ||
+      taskObj.title.toLowerCase().includes(text)
+      ? 1
+      : 0;
+  });
+
+  showTasks(filterArray);
 }
 
 function editTask(identifier) {
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
-
-  let index = getIndexFromId(identifier, storedTasks);
-
-  let editTaskObj = storedTasks[index];
-
+  let index = getIndexFromId(identifier, tasksArray);
+  let editTaskObj = tasksArray[index];
   addTaskText.textContent = "Update Task";
   addButton.textContent = "Update";
-  addButton.setAttribute("id", "update-functionality");
+
   addButton.onclick = function () {
-    editTaskContent(identifier);
+    addTask(identifier);
   };
   title.value = editTaskObj["title"];
   description.value = editTaskObj["description"];
   status.value = editTaskObj["status"];
   statusOption1.disabled = false;
   statusOtion2.disabled = false;
-}
-
-function editTaskContent(identifier) {
-  filterElement.value = "all-task";
-  searchContentTitle.value = "";
-  searchContentDescription.value = "";
-  searchContentTitleDes.value = "";
-
-  let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
-  let index = getIndexFromId(identifier, storedTasks);
-
-  storedTasks[index].title = title.value;
-  storedTasks[index].description = description.value;
-  storedTasks[index].status = status.value;
-
-  title.value = "";
-  description.value = "";
-  status.value = "ToDo";
-
-  addTaskText.textContent = "Add Task";
-  addButton.textContent = "Add";
-  addButton.setAttribute("id", "add-functionality");
-  addButton.onclick = function () {
-    addTask();
-  };
-  statusOption1.disabled = true;
-  statusOtion2.disabled = true;
-
-  storeDataToLocal(storedTasks);
-  showTasks(storedTasks);
 }
