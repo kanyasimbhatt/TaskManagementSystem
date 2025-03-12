@@ -140,8 +140,7 @@ function DeleteTask(ids) {
   let index = getIndexFromId(ids, tasksArray);
   tasksArray.splice(index, 1);
   storeDataToLocal(tasksArray);
-  showTasks(tasksArray);
-  filterElement.value = "all-task";
+  showSelectedTasks(filterElement.value, tasksArray);
 }
 
 //updateStatus() -> handling the status change from the task card itself
