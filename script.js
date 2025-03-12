@@ -216,7 +216,7 @@ function showSelectedTasks(taskId, storedTasks) {
 function searchTitle(event) {
   if (filterElement.value != "all-task") {
     if (event.key == "Delete" || event.key == "Backspace") {
-      console.log(filterElement.value);
+      showSelectedTasks(filterElement.value, tasksArray);
       filterArray = statusChangedTasks;
     }
     let text = searchContentTitle.value.toLowerCase();
@@ -249,7 +249,7 @@ function searchTitle(event) {
 function searchDescription(event) {
   if (filterElement.value != "all-task") {
     if (event.key == "Delete" || event.key == "Backspace") {
-      console.log(filterElement.value);
+      showSelectedTasks(filterElement.value, tasksArray);
       filterArray = statusChangedTasks;
     }
     let text = searchContentDescription.value.toLowerCase();
@@ -282,7 +282,7 @@ function searchDescription(event) {
 function searchTitleDes(event) {
   if (filterElement.value != "all-task") {
     if (event.key == "Delete" || event.key == "Backspace") {
-      console.log(filterElement.value);
+      showSelectedTasks(filterElement.value, tasksArray);
       filterArray = statusChangedTasks;
     }
     let text = searchContentTitleDes.value.toLowerCase();
