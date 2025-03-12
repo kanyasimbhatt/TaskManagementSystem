@@ -1,13 +1,3 @@
-//initial setup
-let statusarr = ["ToDo", "In Progress", "Done"];
-let colorMap = new Map();
-colorMap.set("ToDo", "todocolor");
-colorMap.set("In Progress", "inprogresscolor");
-colorMap.set("Done", "donecolor");
-document.getElementById("searching-title").value = "";
-document.getElementById("searching-des").value = "";
-document.getElementById("searching-title-des").value = "";
-
 //common elements
 const addTaskText = document.getElementsByClassName("add-task-text")[0];
 const addButton = document.getElementsByClassName("add-button")[0];
@@ -20,19 +10,29 @@ const filterElement = document.getElementsByClassName("status-change")[0];
 const searchContentTitleDes = document.getElementById("searching-title-des");
 let statusOption1 = status.children[1];
 let statusOtion2 = status.children[2];
+const allTask = document.getElementsByClassName("all-tasks")[0];
+let tasks = JSON.parse(localStorage.getItem("tasks-array"));
+
+//initial setup
+let statusarr = ["ToDo", "In Progress", "Done"];
+let colorMap = new Map();
+colorMap.set("ToDo", "todocolor");
+colorMap.set("In Progress", "inprogresscolor");
+colorMap.set("Done", "donecolor");
+document.getElementById("searching-title").value = "";
+document.getElementById("searching-des").value = "";
+document.getElementById("searching-title-des").value = "";
+title.value = "";
+description.value = "";
+showTasks(tasks);
 
 if (!localStorage.getItem("searched-array")) {
-  localStorage.setItem("searched-array", JSON.stringify([]));
+  storeDataToLocal([]);
 }
 
 if (!localStorage.getItem("tasks-array")) {
-  localStorage.setItem("tasks-array", JSON.stringify([]));
+  storeDataToLocal([]);
 }
-
-title.value = "";
-description.value = "";
-
-const allTask = document.getElementsByClassName("all-tasks")[0];
 
 function addTask() {
   let title = document.getElementsByClassName("task")[0];
@@ -51,7 +51,7 @@ function addTask() {
 
   let arr = JSON.parse(localStorage.getItem("tasks-array"));
   arr.push(tasks);
-  localStorage.setItem("tasks-array", JSON.stringify(arr));
+  storeDataToLocal(arr);
   title.value = "";
   description.value = "";
   filterElement.value = "all-task";
@@ -59,6 +59,10 @@ function addTask() {
   searchContentDescription.value = "";
   searchContentTitleDes.value = "";
   showTasks(arr);
+}
+
+function storeDataToLocal(arr) {
+  localStorage.setItem("tasks-array", JSON.stringify(arr));
 }
 
 function calculateUnselected(status) {
@@ -109,8 +113,6 @@ function showTasks(tasks) {
     allTask.innerHTML = `<div class = "d-flex justify-content-center no-content flex-grow-1 ms-3 me-3"><b class="mt-2 mb-2">No Tasks yet</b></div>`;
   }
 }
-let tasks = JSON.parse(localStorage.getItem("tasks-array"));
-showTasks(tasks);
 
 function getIndexFromId(ids, storedTasks) {
   let index = 0;
@@ -124,7 +126,7 @@ function DeleteTask(ids) {
   let storedTasks = JSON.parse(localStorage.getItem("tasks-array"));
   let index = getIndexFromId(ids, storedTasks);
   storedTasks.splice(index, 1);
-  localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
+  storeDataToLocal(storedTasks);
   showTasks(storedTasks);
 }
 
@@ -135,13 +137,13 @@ function UpdateStatus(status_name, taskId) {
   let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
   if (taskIndex !== -1) {
     storedTasks[taskIndex].status = status_name;
-    localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
+    storeDataToLocal(storedTasks);
   }
 
   if (searchedTaskIndex !== -1) {
     searchedTasks[searchedTaskIndex].status = status_name;
 
-    localStorage.setItem("searched-array", JSON.stringify(searchedTasks));
+    storeDataToLocal(storedTasks);
   }
 
   if (taskId === -1 && searchedTaskIndex === -1) return;
@@ -238,6 +240,7 @@ function editTask(identifier) {
   let editTaskObj = storedTasks[index];
 
   addTaskText.textContent = "Update Task";
+  addButton.textContent = "Update";
   addButton.onclick = function () {
     editTaskContent(identifier);
   };
@@ -266,12 +269,13 @@ function editTaskContent(identifier) {
   status.value = "ToDo";
 
   addTaskText.textContent = "Add Task";
+  addButton.textContent = "Add";
   addButton.onclick = function () {
     addTask();
   };
   statusOption1.disabled = true;
   statusOtion2.disabled = true;
 
-  localStorage.setItem("tasks-array", JSON.stringify(storedTasks));
+  storeDataToLocal(storedTasks);
   showTasks(storedTasks);
 }
