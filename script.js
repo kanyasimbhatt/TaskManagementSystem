@@ -101,9 +101,6 @@ function showTasks(tasks) {
 
     htmlcode += `<div class="card me-2 mb-2 ${color} shadow-sm" style="width: 18rem">
 
-
-
-
     <div class="card-body d-flex flex-column align-items-center justify-content-center">
     <h5 class="card-title h-20">${tasks[a].title}</h5>
     <p class="card-text text-center h-20">
@@ -144,6 +141,7 @@ function DeleteTask(ids) {
   tasksArray.splice(index, 1);
   storeDataToLocal(tasksArray);
   showTasks(tasksArray);
+  filterElement.value = "all-task";
 }
 
 //updateStatus() -> handling the status change from the task card itself
