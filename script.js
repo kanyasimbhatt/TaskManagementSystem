@@ -138,25 +138,26 @@ function getIndexFromId(ids, storedTasks) {
 
 function DeleteTask(ids) {
   let index = getIndexFromId(ids, tasksArray);
+  let statusIndex = getIndexFromId(ids, statusChangedTasks);
+  let filterIndex = getIndexFromId(ids, filterArray);
   tasksArray.splice(index, 1);
+  statusChangedTasks.splice(statusIndex, 1);
+  filterArray.splice(filterIndex, 1);
   storeDataToLocal(tasksArray);
-  showSelectedTasks(filterElement.value, tasksArray);
+  showSelectedTasks(filterElement.value, filterArray);
 }
 
 //updateStatus() -> handling the status change from the task card itself
 function updateStatus(status_name, taskId) {
-  let searchedTasks = JSON.parse(localStorage.getItem("searched-array"));
   let taskIndex = tasksArray.findIndex((task) => task.id === taskId);
-  let searchedTaskIndex = searchedTasks.findIndex((task) => task.id === taskId);
+  let searchedTaskIndex = filterArray.findIndex((task) => task.id === taskId);
   if (taskIndex !== -1) {
     tasksArray[taskIndex].status = status_name;
     storeDataToLocal(tasksArray);
   }
 
   if (searchedTaskIndex !== -1) {
-    searchedTasks[searchedTaskIndex].status = status_name;
-
-    storeDataToLocal(storedTasks);
+    filterArray[searchedTaskIndex].status = status_name;
   }
 
   if (taskId === -1 && searchedTaskIndex === -1) return;
